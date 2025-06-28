@@ -2,8 +2,10 @@ package snake_game;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Image;
 import java.net.URL;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -12,6 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
 /*
@@ -27,22 +30,29 @@ public class MainMenuPanel extends JPanel {
 	private JButton hiScoresBtn;
 	private JButton exitBtn;
 	private JButton helpBtn;
+	private JButton settingsBtn;
+	private JPanel smallBtnPanel;
 	private JPanel btnPanel;
 	private JLabel titleLbl;
-	
+
 	// Other fields
 	private static final long serialVersionUID = -2394769013522953624L;
+	private SnakeGame snakeGame;
 
 	public MainMenuPanel(SnakeGame snakeGame) {
 
 		// init misc fields
 		titleLbl = new JLabel(getScaledIcon("/asset/title.png", 300, 100), SwingConstants.CENTER);
+		smallBtnPanel = new JPanel(new FlowLayout());
+		smallBtnPanel.setOpaque(false);
+		this.snakeGame = snakeGame;
 
 		// init buttons
 		newGameBtn = new JButton();
 		hiScoresBtn = new JButton();
 		exitBtn = new JButton();
 		helpBtn = new JButton();
+		settingsBtn = new JButton();
 		btnPanel = new JPanel();
 		btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.Y_AXIS));
 
@@ -67,6 +77,11 @@ public class MainMenuPanel extends JPanel {
 		helpBtn.setPressedIcon(getScaledIcon("/asset/help_pressed.png", 30, 30));
 		configBtn(helpBtn);
 
+		settingsBtn.setIcon(getScaledIcon("/asset/settings.png", 30, 30));
+		settingsBtn.setRolloverIcon(getScaledIcon("/asset/settings_rollover.png", 30, 30));
+		settingsBtn.setPressedIcon(getScaledIcon("/asset/settings_pressed.png", 30, 30));
+		configBtn(settingsBtn);
+
 		// settings for buttonpanel
 		btnPanel.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
 		btnPanel.setBackground(new Color(223, 192, 192));
@@ -88,15 +103,9 @@ public class MainMenuPanel extends JPanel {
 
 		exitBtn.addActionListener(e -> snakeGame.closeGame());
 
-		helpBtn.addActionListener(e -> {
-			JOptionPane.showMessageDialog(this, "Up: W/Up Arrow\n"
-					+ "Left: A/Left Arrow\n"
-					+ "Right: D/Right Arrow\n"
-					+ "Down: S/Down Arrow\n"
-					+ "Autoplay (greedy algorithm): P\n", 
-					"Controls", 
-					JOptionPane.INFORMATION_MESSAGE);
-		});
+		helpBtn.addActionListener(e -> showHelp());
+
+		settingsBtn.addActionListener(e -> showSettings());
 
 		// add buttons to button panel
 		btnPanel.add(Box.createVerticalGlue());
@@ -107,7 +116,12 @@ public class MainMenuPanel extends JPanel {
 		btnPanel.add(hiScoresBtn);
 		btnPanel.add(Box.createVerticalStrut(20));
 		btnPanel.add(exitBtn);
-		btnPanel.add(helpBtn);
+
+		smallBtnPanel.add(helpBtn);
+		smallBtnPanel.add(settingsBtn);
+
+		btnPanel.add(smallBtnPanel);
+
 		btnPanel.add(Box.createVerticalGlue());
 
 		// center assets
@@ -116,10 +130,75 @@ public class MainMenuPanel extends JPanel {
 		hiScoresBtn.setAlignmentX(CENTER_ALIGNMENT);
 		exitBtn.setAlignmentX(CENTER_ALIGNMENT);
 		helpBtn.setAlignmentX(CENTER_ALIGNMENT);
+		settingsBtn.setAlignmentX(CENTER_ALIGNMENT);
 
 		// add button panel to main menu panel
 		setLayout(new BorderLayout());
 		add(btnPanel, BorderLayout.CENTER);
+	}
+
+	public void showHelp() {
+		JOptionPane.showMessageDialog(this, "Up: W/Up Arrow\n"
+				+ "Left: A/Left Arrow\n"
+				+ "Right: D/Right Arrow\n"
+				+ "Down: S/Down Arrow\n"
+				+ "Autoplay (greedy algorithm): P\n", 
+				"Controls", 
+				JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	public void showSettings() {
+		
+		// window size
+		JPanel winSize = new JPanel();
+		JSlider winSizeSlider = new JSlider(JSlider.HORIZONTAL, 12, 30, Settings.getCellSize());
+		JLabel winSizeLabel = new JLabel("Window Size:");
+		winSizeSlider.setPaintTicks(true);
+		winSizeSlider.setMajorTickSpacing(3);
+		winSizeSlider.setMinorTickSpacing(1);
+		winSizeSlider.setPaintLabels(true);
+		winSize.add(winSizeLabel);
+		winSize.add(winSizeSlider);
+
+		// snake speed
+		JPanel gameSpd = new JPanel();
+		JSlider gameSpdSlider = new JSlider(JSlider.HORIZONTAL, 12, 25, Const.DEFAULT_FPS);
+		JLabel gameSpdLabel = new JLabel("Game Speed (FPS):");
+		gameSpdSlider.setPaintTicks(true);
+		gameSpdSlider.setMajorTickSpacing(3);
+		gameSpdSlider.setMinorTickSpacing(1);
+		gameSpdSlider.setPaintLabels(true);
+		gameSpd.add(gameSpdLabel);
+		gameSpd.add(gameSpdSlider);
+		
+		// panel to hold both sliders
+		JPanel settingsPanel = new JPanel();
+		settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
+		settingsPanel.add(Box.createVerticalGlue());
+		settingsPanel.add(winSize);
+		settingsPanel.add(Box.createVerticalStrut(10));
+		settingsPanel.add(gameSpd);
+		settingsPanel.add(Box.createVerticalGlue());
+		
+		// listeners for sliders
+		winSizeSlider.addChangeListener(e -> onWindowSliderChanged(winSizeSlider.getValue()));
+		
+		gameSpdSlider.addChangeListener(e -> onGameSpeedSliderChanged(gameSpdSlider.getValue()));
+		
+		JOptionPane.showMessageDialog(this,
+				settingsPanel,
+				"Settings",
+				JOptionPane.PLAIN_MESSAGE);
+	}
+	
+	public void onGameSpeedSliderChanged(int newSpeed) {
+		System.out.println("Game speed slider value: " + newSpeed);
+		snakeGame.handleGameSpeedChanged(newSpeed);
+	}
+	
+	public void onWindowSliderChanged(int newSize) {
+		System.out.println("Window size slider value: " + newSize);
+		snakeGame.handleResizeWindow(newSize);
 	}
 
 	private ImageIcon getScaledIcon(String path, int x, int y) {

@@ -1,12 +1,10 @@
 package snake_game;
 
-import static snake_game.Const.CELL_SIZE;
-import static snake_game.Const.DELAY;
+import static snake_game.Const.DEFAULT_DELAY;
 import static snake_game.Const.NUM_COLS;
 import static snake_game.Const.NUM_ROWS;
 import static snake_game.Const.SNAKE_START_COL;
 import static snake_game.Const.SNAKE_START_ROW;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -26,7 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -42,7 +39,7 @@ import javax.swing.Timer;
 
 public class GamePanel extends JPanel {
 
-	// Gaamestate-specific fields
+	// Gamestate-specific fields
 	private Cell[][] gameArea;
 	private boolean isGameOver;
 	private int foodEaten;
@@ -64,6 +61,7 @@ public class GamePanel extends JPanel {
 	private static final long serialVersionUID = -2969235666770895319L;
 	private SnakeGame snakeGame;
 	private Map<String, Integer> hiScores;
+	private int delay;
 
 	public GamePanel(SnakeGame snakeGame) {
 
@@ -71,9 +69,11 @@ public class GamePanel extends JPanel {
 		this.snakeGame = snakeGame;
 		hiScores = new HashMap<>();
 		readHiScores(); // load the hiscores from hiscores.txt, if it exists
+		delay = DEFAULT_DELAY;
 
 		// jframe settings
-		setPreferredSize(new Dimension(NUM_COLS * CELL_SIZE, NUM_ROWS * CELL_SIZE));
+		int cellSize = Settings.getCellSize();
+		setPreferredSize(new Dimension(NUM_COLS * cellSize, NUM_ROWS * cellSize));
 		setFocusable(true);
 		requestFocusInWindow();
 		gameArea = new Cell[NUM_ROWS][NUM_COLS];
@@ -94,7 +94,7 @@ public class GamePanel extends JPanel {
 		spawnFood();
 
 		// game loop
-		timer = new Timer(DELAY, e -> {
+		timer = new Timer(delay, e -> {
 
 			if (autoPlay)
 				moveTowardFood();
@@ -131,6 +131,13 @@ public class GamePanel extends JPanel {
 				}
 			}
 		});
+	}
+
+	public void resizeWindow(int newCellSize) {
+		Settings.setCellSize(newCellSize);
+		setPreferredSize(new Dimension(NUM_COLS * newCellSize, NUM_ROWS * newCellSize));
+		revalidate();
+		repaint();
 	}
 
 	public void startGame(String playerName) {
@@ -348,9 +355,10 @@ public class GamePanel extends JPanel {
 					break;
 				}
 
-				int x = col * CELL_SIZE;
-				int y = row * CELL_SIZE;
-				g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+				int cellSize = Settings.getCellSize();
+				int x = col * cellSize;
+				int y = row * cellSize;
+				g.fillRect(x, y, cellSize, cellSize);
 			}
 		}			 
 	}
@@ -409,12 +417,12 @@ public class GamePanel extends JPanel {
 			return;
 		}
 	}
-	
+
 	public List<Map.Entry<String, Integer>> getSortedHiScores(Map<String, Integer> unsorted) {
 		List<Map.Entry<String, Integer>> sorted = new ArrayList<>(unsorted.entrySet());
-		
+
 		sorted.sort((a, b) -> b.getValue().compareTo(a.getValue()));;
-		
+
 		return sorted;
 	}
 
@@ -423,5 +431,10 @@ public class GamePanel extends JPanel {
 	public void setUserName(String name) { playerName = name; }
 
 	public Map<String, Integer> getHiScores() { return hiScores; }
+
+	public void setDelay(int delay) {
+		this.delay = delay;
+		timer.setDelay(delay);
+	}
 
 }

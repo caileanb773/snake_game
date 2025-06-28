@@ -68,6 +68,15 @@ public class SnakeGame {
 	public void closeGame() {
 		frame.dispose();
 	}
+	
+	public void handleResizeWindow(int newSize) {
+		gamePanel.resizeWindow(newSize);
+		frame.pack();
+	}
+	
+	public void handleGameSpeedChanged(int newSpeed) {
+		gamePanel.setDelay(1000 / newSpeed);
+	}
 
 	public void manageHiScores() {
 		Map<String, Integer> scores = gamePanel.getHiScores();

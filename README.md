@@ -21,3 +21,17 @@ The game comes with a very rudimentary (and greedy) pathfinding algorithm. To to
 The snake will determine the direction of the food based on its x and y coordinates and change its direction accordingly.
 Due to the simplicity of the current version of this algorithm, the snake will not take measures to avoid colliding with itself,
 although in the future I plan to write versions of this algorithm using A* and Dijkstra's algorithm that can also be toggled.
+
+------
+
+Settings:
+
+The game window size and game speed can both be changed by clicking the gear icon from the main menu.
+The gameplay area is comprised of a grid of cells, each one with a default size (in pixels), along with
+a fixed number of rows and columns. The amount of space the game takes up in the screen is determined by
+multiplying the cell size by the number of columns/rows. Changing the game window size only changes the
+cell size in pixels, which changes the number of pixels the game occupies on the screen.
+
+Changing the game speed modifies the FPS (frames per second) of the game, which changes the calculation
+that the internal timer uses. The timer runs on a delay which is determined by 1000 / FPS, the default
+being 18. Higher FPS = more fluid (and faster) gameplay.
